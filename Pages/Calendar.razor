@@ -1,0 +1,16 @@
+﻿@page "/calendar"
+@inject AppState AppState
+
+<h3>Добро пожаловать, @AppState.Username!</h3>
+
+<input type="date" @bind="selectedDate" />
+
+<p>Выбранная дата: @selectedDate?.ToString("yyyy-MM-dd")</p>
+
+<a href="/login">Выход</a>
+
+@code {
+    [Parameter]
+    public string Username { get; set; }
+    private DateTime? selectedDate;
+}

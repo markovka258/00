@@ -1,0 +1,47 @@
+@page "/login"
+@inject AppDbContext DbContext
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@inject AppState AppState
+@inject IJSRuntime JSRuntime
+
+<h3>Вход</h3>
+
+
+
+
+<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+    <InputText @bind-Value="loginModel.Username" placeholder="Имя пользователя" />
+    <InputText @bind-Value="loginModel.Password" placeholder="Пароль" type="password" />
+    <button type="submit">Войти</button>
+</EditForm><br/>
+<a href="/">На главную</a>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+
+    private void HandleLogin()
+    {
+        var result = AuthService.Login(loginModel.Username, loginModel.Password);
+        if (result)
+        {
+            AppState.Username = loginModel.Username;
+            Navigation.NavigateTo("/calendar");
+        }
+        else
+        {
+            JSRuntime.InvokeVoidAsync("alert", "Неверный пароль или пользователь не найден!");
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        AppState.Username = "";
+    }
+
+    public class LoginModel
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+}

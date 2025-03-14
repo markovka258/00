@@ -1,0 +1,67 @@
+﻿@page "/register"
+@using System.ComponentModel.DataAnnotations;
+@inject AppDbContext DbContext
+@inject NavigationManager Navigation
+
+<h3>Регистрация</h3>
+
+<EditForm Model="@registerModel" OnValidSubmit="HandleRegistration">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Имя пользователя:</label>
+        <InputText @bind-Value="registerModel.Username" />
+        <ValidationMessage For="@(() => registerModel.Username)" />
+    </div>
+
+    <div>
+        <label>Пароль:</label>
+        <InputText type="password" @bind-Value="registerModel.Password" />
+        <ValidationMessage For="@(() => registerModel.Password)" />
+    </div>
+
+    <button type="submit">Зарегистрироваться</button>
+</EditForm><br/>
+<a href="/">На главную</a>
+
+@code {
+    private RegisterModel registerModel = new RegisterModel();
+
+    private async Task HandleRegistration()
+    {
+        // Хэширование пароля
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerModel.Password);
+
+        // Создание нового пользователя
+        var user = new User
+            {
+                Username = registerModel.Username,
+                PasswordHash = passwordHash
+            };
+
+        // Сохранение пользователя в базе данных
+        DbContext.Users.Add(user);
+        try
+        {
+            DbContext.SaveChanges();
+        }
+        catch(Exception e)
+        {
+            
+        }
+
+        // Перенаправление на страницу входа
+        Navigation.NavigateTo("/login");
+    }
+
+    public class RegisterModel
+    {
+        [Required(ErrorMessage = "Имя пользователя обязательно")]
+        public string Username { get; set; }
+
+        [Required(ErrorMessage = "Пароль обязателен")]
+        [MinLength(6, ErrorMessage = "Пароль должен содержать не менее 6 символов")]
+        public string Password { get; set; }
+    }
+}
